@@ -1,0 +1,20 @@
+#!/bin/bash
+
+cat make.static>makefile
+prog=${PWD##*/}
+linkargs=`cat linkargs`
+
+list=""
+for s in  *.cpp; do
+  outfile=${s/.cpp/.o}
+  headers=`grep -oP '(?<=#include ")\w+.h(?=")' $s | tr "\n" " "`
+  echo $outfile : $s $headers>>makefile
+  echo $'\t'"g++ -c $s">>makefile
+  echo >> makefile
+  list="$list $outfile"
+done
+
+echo "bin/$prog : $list">>makefile
+echo $'\t'"g++ $list $linkargs -o bin/$prog">>makefile
+
+make bin/$prog
